@@ -1,0 +1,97 @@
+Perfect! GitHub Desktop makes this much easier. Here's the step-by-step guide using GitHub Desktop:
+
+## GitHub Desktop Deployment Guide
+
+### Step 1: Create Repository in GitHub Desktop
+
+1. Open **GitHub Desktop**
+2. Click **File** → **New Repository**
+3. Fill in:
+
+1. **Name**: `miren-media-website`
+2. **Description**: `Miren Media Record Label Website`
+3. **Local Path**: Choose where you want the folder
+4. **Initialize with README**: ✅ Check this
+
+
+
+4. Click **Create Repository**
+
+
+### Step 2: Add Your Project Files
+
+1. GitHub Desktop created a folder - open it in File Explorer
+2. Copy all your project files into this folder:
+
+```plaintext
+miren-media-website/
+├── app/
+├── components/
+├── public/
+├── package.json
+├── next.config.mjs
+└── ... (all other files)
+```
+
+
+
+
+### Step 3: Create Required Files
+
+**Create `next.config.mjs`:**
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  },
+  basePath: process.env.NODE_ENV === 'production' ? '/miren-media-website' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/miren-media-website/' : '',
+}
+
+export default nextConfig
+```
+
+**Create `.github/workflows/deploy.yml`:**
+
+1. Create folders: `.github` → `workflows`
+2. Create file `deploy.yml` with this content:
+
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./out
+```
